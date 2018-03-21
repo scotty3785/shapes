@@ -4,46 +4,50 @@
 # CC-BY-SA 4.0
 
 try:
-    from tkinter import Tk, Canvas, BOTH
+    from guizero import App
+    from tkinter import *
 except ImportError:
-    print("tkinter did not import successfully - check you are running Python 3 and that tkinter is available.")
+    print("guizero or tkinter did not import successfully - check you are running Python 3 and that guizero/tkinter is available.")
     exit(1)
 
 import random
 
-class Paper(Tk):
+class Paper():
 
-    def __init__(self, width=600, height=600):
+    def __init__(self, master,  width=600, height=600):
 
         """Create a Paper object which allows shapes to be drawn onto it.
         """
 
         # Call the constructor from the superclass (tkinter's Tk)
-        try:
-            super().__init__()
-        except ValueError:
-            print("Error: could not instantiate Paper object")
+        #try:
+            #super().__init__()
+        #except ValueError:
+            #print("Error: could not instantiate Paper object")
 
         # Set some attributes
-        self.title( "Drawing shapes" )
-        self.geometry(str(width)+"x"+str(height))
+        #self.title( "Drawing shapes" )
+        #self.geometry(str(width)+"x"+str(height))
         self.paper_width = width
         self.paper_height = height
 
         # Create a tkinter canvas object to draw on
-        self.canvas = Canvas(self)
+        self.canvas = Canvas(master.tk)
         self.canvas.pack(fill=BOTH, expand=1)
+        
+    def set_background(self,color):
+        self.canvas['bg'] = color
 
 
 class Shape():
 
     # Static class variable removing the need to pass in a Paper object
     # to draw the shapes on
-    paper = Paper()
+    #paper = Paper()
 
     # Constructor for Shape
-    def __init__(self, width=50, height=50, x=None, y=None, color="black"):
-
+    def __init__(self, paper, width=50, height=50, x=None, y=None, color="black"):
+        self.paper = paper
         """Creates a generic 'shape' which contains properties common to all
         shapes such as height, width, x y coordinates and colour.
         """
@@ -93,35 +97,49 @@ class Shape():
 
         self.color = random.choice(["red", "yellow", "blue", "green", "gray", "white", "black", "cyan", "pink", "purple"])
 
+    def _redraw(self):
+        """Internal method to change the location of an existing shape"""
+        if hasattr(self,'shapeObj'):
+            #x1,y1,x2,y2 = self._location()
+            location = self._location()
+            #self.paper.canvas.coords(self.shapeObj,x1,y1,x2,y2)
+            self.paper.canvas.coords(self.shapeObj,location)
+    
     # Getters and setters for Shape attributes
     def set_width(self, width):
         """Sets the width of the shape"""
-
         self.width = width
+        self._redraw()
+        
+    def get_width(self):
+        return self.width
 
     def set_height(self,height):
         """Sets the height of the shape"""
-
         self.height = height
+        self._redraw()
+        
+    def get_height(self):
+        return self.height
 
     def set_x(self, x):
         """Sets the x position of the shape"""
-
         self.x = x
+        self._redraw()
 
     def set_y(self, y):
         """Sets the y position of the shape"""
-
         self.y = y
+        self._redraw()
 
     def set_color(self, color):
         """Sets the colour of the shape"""
-
         self.color = color
+        if hasattr(self,'shapeObj'):
+            self.paper.canvas.itemconfig(self.shapeObj,fill=self.color)
 
     def get_color(self):
         """Returns the colour of the shape"""
-
         return self.color
 
 
@@ -137,7 +155,7 @@ class Rectangle(Shape):
         x1, y1, x2, y2 = self._location()
 
         # Draw the rectangle
-        self.paper.canvas.create_rectangle(x1, y1, x2, y2, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_rectangle(x1, y1, x2, y2, fill=self.color)
 
 
 class Oval(Shape):
@@ -150,20 +168,20 @@ class Oval(Shape):
         x1, y1, x2, y2 = self._location()
 
         # Draw the oval
-        self.paper.canvas.create_oval(x1, y1, x2, y2, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_oval(x1, y1, x2, y2, fill=self.color)
 
 
 class Triangle(Shape):
 
     # Every constructor parameter has a default setting
     # e.g. color defaults to "black" but you can override this
-    def __init__(self, x1=0, y1=0, x2=20, y2=0, x3=20, y3=20, color="black"):
-
+    def __init__(self, paper, x1=0, y1=0, x2=20, y2=0, x3=20, y3=20, color="black"):
+        self.paper = paper
         """Overrides the Shape constructor because triangles require three
         coordinate points to be drawn, unlike rectangles and ovals."""
 
         try:
-            super().__init__(color=color)
+            super().__init__(self.paper, color=color)
         except ValueError:
             print("Error: could not instantiate Triangle")
 
@@ -196,7 +214,7 @@ class Triangle(Shape):
 
         x1, y1, x2, y2, x3, y3 = self._location()
         # Draw a triangle
-        self.paper.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=self.color)
 
     def randomize(self):
 
@@ -230,25 +248,30 @@ class Triangle(Shape):
 # This if statement means
 # "if you run this file (rather than importing it), run this demo script"
 if __name__ == "__main__":
-
+    app = App()
+    p = Paper(app)
+    p.set_background('white')
+    
     # Random size and location triangle
-    tri = Triangle()
+    tri = Triangle(p)
     tri.randomize()
     tri.draw()
 
     # Specific size and location rectangle
-    rect = Rectangle(height=40, width=90, x=110, y=20, color="yellow")
+    rect = Rectangle(p,height=40, width=90, x=110, y=20, color="yellow")
     rect.draw()
 
     # Default oval
-    oval = Oval()
+    oval = Oval(p)
     oval.draw()
 
     # Oval with setters
-    oval2 = Oval()
+    oval2 = Oval(p)
     oval2.set_height(200)
     oval2.set_width(100)
     oval2.set_color("fuchsia")
     oval2.set_x(30)
     oval2.set_y(90)
     oval2.draw()
+    
+    app.display()
