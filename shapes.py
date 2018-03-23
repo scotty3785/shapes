@@ -14,7 +14,7 @@ import random
 
 class Paper():
 
-    def __init__(self, master,  width=600, height=600):
+    def __init__(self, master,  width=300, height=300):
 
         """Create a Paper object which allows shapes to be drawn onto it.
         """
@@ -53,19 +53,19 @@ class Shape():
         """
 
         # Set some attributes
-        self.height = height
-        self.width = width
-        self.color = color
+        self._height = height
+        self._width = width
+        self._color = color
 
         # Put the shape in the centre if no xy coords were given
         if x is None:
-            self.x = (self.paper.paper_width/2) - (self.width/2)
+            self._x = (self.paper.paper_width/2) - (self._width/2)
         else:
-            self.x = x
+            self._x = x
         if y is None:
-            self.y = (self.paper.paper_height/2) - (self.height/2)
+            self._y = (self.paper.paper_height/2) - (self._height/2)
         else:
-            self.y = y
+            self._y = y
 
     # This is an internal method not meant to be called by users
     # (It has a _ before the method name to show this)
@@ -75,11 +75,11 @@ class Shape():
         name begins with an underscore.
         """
 
-        x1 = self.x
-        y1 = self.y
-        x2 = self.x + self.width
-        y2 = self.y + self.height
-        return [x1, y1, x2, y2]
+        x1 = self._x
+        y1 = self._y
+        x2 = self.x + self._width
+        y2 = self.y + self._height
+        return (x1, y1, x2, y2)
 
     # Randomly generate what the shape looks like
     def randomize(self, smallest=20, largest=200):
@@ -92,8 +92,8 @@ class Shape():
         self.width = random.randint(smallest, largest)
         self.height = random.randint(smallest, largest)
 
-        self.x = random.randint(0, self.paper.paper_width-self.width)
-        self.y = random.randint(0, self.paper.paper_height-self.height)
+        self.x = random.randint(0, self.paper.paper_width-self._width)
+        self.y = random.randint(0, self.paper.paper_height-self._height)
 
         self.color = random.choice(["red", "yellow", "blue", "green", "gray", "white", "black", "cyan", "pink", "purple"])
 
@@ -106,41 +106,59 @@ class Shape():
             self.paper.canvas.coords(self.shapeObj,location)
     
     # Getters and setters for Shape attributes
-    def set_width(self, width):
+    @property    
+    def width(self):
+        return self._width
+    
+    @width.setter
+    def width(self, width):
         """Sets the width of the shape"""
-        self.width = width
+        self._width = width
         self._redraw()
-        
-    def get_width(self):
-        return self.width
 
-    def set_height(self,height):
+    @property        
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self,height):
         """Sets the height of the shape"""
-        self.height = height
+        self._height = height
         self._redraw()
-        
-    def get_height(self):
-        return self.height
 
-    def set_x(self, x):
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, x):
         """Sets the x position of the shape"""
-        self.x = x
+        self._x = x
         self._redraw()
 
-    def set_y(self, y):
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, y):
         """Sets the y position of the shape"""
-        self.y = y
+        self._y = y
         self._redraw()
 
-    def set_color(self, color):
-        """Sets the colour of the shape"""
-        self.color = color
-        if hasattr(self,'shapeObj'):
-            self.paper.canvas.itemconfig(self.shapeObj,fill=self.color)
-
-    def get_color(self):
+    @property
+    def color(self):
         """Returns the colour of the shape"""
-        return self.color
+        return self._color
+
+    @color.setter
+    def color(self, color):
+        """Sets the colour of the shape"""
+        self._color = color
+        if hasattr(self,'shapeObj'):
+            self.paper.canvas.itemconfig(self.shapeObj,fill=self._color)
+            
+
 
 
 # Rectangle class is a subclass of Shape
@@ -155,7 +173,7 @@ class Rectangle(Shape):
         x1, y1, x2, y2 = self._location()
 
         # Draw the rectangle
-        self.shapeObj = self.paper.canvas.create_rectangle(x1, y1, x2, y2, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_rectangle(x1, y1, x2, y2, fill=self._color)
 
 
 class Oval(Shape):
@@ -168,7 +186,7 @@ class Oval(Shape):
         x1, y1, x2, y2 = self._location()
 
         # Draw the oval
-        self.shapeObj = self.paper.canvas.create_oval(x1, y1, x2, y2, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_oval(x1, y1, x2, y2, fill=self._color)
 
 
 class Triangle(Shape):
@@ -187,16 +205,16 @@ class Triangle(Shape):
 
         # Remove height and width attributes which make no sense for a triangle
         # (triangles are drawn via 3 xy coordinates)
-        del self.height
-        del self.width
+        del self._height
+        del self._width
 
         # Instead add three coordinate attributes
-        self.x = x1
-        self.y = y1
-        self.x2 = x2
-        self.y2 = y2
-        self.x3 = x3
-        self.y3 = y3
+        self._x = x1
+        self._y = y1
+        self._x2 = x2
+        self._y2 = y2
+        self._x3 = x3
+        self._y3 = y3
 
     def _location(self):
 
@@ -205,7 +223,7 @@ class Triangle(Shape):
         name begins with an underscore.
         """
 
-        return [self.x, self.y, self.x2, self.y2, self.x3, self.y3]
+        return [self._x, self._y, self._x2, self._y2, self._x3, self._y3]
 
     def draw(self):
 
@@ -214,7 +232,7 @@ class Triangle(Shape):
 
         x1, y1, x2, y2, x3, y3 = self._location()
         # Draw a triangle
-        self.shapeObj = self.paper.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=self.color)
+        self.shapeObj = self.paper.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill=self._color)
 
     def randomize(self):
 
@@ -222,15 +240,15 @@ class Triangle(Shape):
         as the colour of the triangle"""
 
         # Randomly choose all the points of the triangle
-        self.x = random.randint(0, self.paper.paper_width)
-        self.y = random.randint(0, self.paper.paper_height)
-        self.x2 = random.randint(0, self.paper.paper_width)
-        self.y2 = random.randint(0, self.paper.paper_height)
-        self.x3 = random.randint(0, self.paper.paper_width)
-        self.y3 = random.randint(0, self.paper.paper_height)
+        self._x = random.randint(0, self.paper.paper_width)
+        self._y = random.randint(0, self.paper.paper_height)
+        self._x2 = random.randint(0, self.paper.paper_width)
+        self._y2 = random.randint(0, self.paper.paper_height)
+        self._x3 = random.randint(0, self.paper.paper_width)
+        self._y3 = random.randint(0, self.paper.paper_height)
 
         # Randomly choose a colour of this triangle
-        self.color = random.choice(["red", "yellow", "blue", "green", "gray", "white", "black", "cyan", "pink", "purple"])
+        self._color = random.choice(["red", "yellow", "blue", "green", "gray", "white", "black", "cyan", "pink", "purple"])
 
     # Change the behaviour of set_width and set_height methods for a triangle
     # because triangles are not drawn in the same way
@@ -267,11 +285,11 @@ if __name__ == "__main__":
 
     # Oval with setters
     oval2 = Oval(p)
-    oval2.set_height(200)
-    oval2.set_width(100)
-    oval2.set_color("fuchsia")
-    oval2.set_x(30)
-    oval2.set_y(90)
+    oval2.height = 200
+    oval2.width = 100
+    oval2.color = "fuchsia"
+    oval2.x = 30
+    oval2.y = 90
     oval2.draw()
     
     app.display()
