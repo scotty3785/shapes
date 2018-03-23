@@ -104,6 +104,11 @@ class Shape():
             location = self._location()
             #self.paper.canvas.coords(self.shapeObj,x1,y1,x2,y2)
             self.paper.canvas.coords(self.shapeObj,location)
+
+    def move(self,dx,dy):
+        self._x += dx
+        self._y += dy
+        self._redraw()
     
     # Getters and setters for Shape attributes
     @property    
@@ -223,7 +228,19 @@ class Triangle(Shape):
         name begins with an underscore.
         """
 
-        return [self._x, self._y, self._x2, self._y2, self._x3, self._y3]
+        return (self._x, self._y, self._x2, self._y2, self._x3, self._y3)
+
+    def move(self,dx,dy):
+        cur_location = self._location()
+        new_location = (cur_location[0]+dx,
+                        cur_location[1]+dy,
+                        cur_location[2]+dx,
+                        cur_location[3]+dy,
+                        cur_location[4]+dx,
+                        cur_location[5]+dy)
+        self._x, self._y, self._x2, self._y2, self._x3, self._y3 = new_location
+        self._redraw()
+        pass
 
     def draw(self):
 
@@ -252,6 +269,7 @@ class Triangle(Shape):
 
     # Change the behaviour of set_width and set_height methods for a triangle
     # because triangles are not drawn in the same way
+    
     def set_width(self, width):
         """Overrides the setter method for width"""
 

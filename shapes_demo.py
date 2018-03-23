@@ -2,10 +2,8 @@ from guizero import App, PushButton
 from shapes import Triangle, Rectangle, Oval, Paper
 
 def changeMe():
-    w = r.width
-    h = r.height
-    r.width = w+20
-    r.height = h+20
+    r.move(20,-20)
+    t2.move(5,0)
 
 
 app = App(width=600,height=600)
